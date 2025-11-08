@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: merchant-service
+
+server:
+  port: 8084
+
+logging:
+  level:
+    root: INFO
+    com.ewallet: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/merchant-service.log
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
