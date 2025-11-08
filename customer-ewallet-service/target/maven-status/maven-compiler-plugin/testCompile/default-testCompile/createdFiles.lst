@@ -1,0 +1,3 @@
+com\example\wallet\OtpServiceTest.class
+com\example\wallet\GlobalExceptionHandlerTest.class
+com\example\wallet\JwtServiceTest.class
