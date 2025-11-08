@@ -1,0 +1,681 @@
+{
+	"info": {
+		"_postman_id": "e-wallet-collection",
+		"name": "E-Wallet Microservices",
+		"description": "Complete Postman collection for E-Wallet microservices APIs with test scripts and variables",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "e-wallet"
+	},
+	"item": [
+		{
+			"name": "Customer Service",
+			"item": [
+				{
+					"name": "1. Onboard Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 200]);",
+									"});",
+									"",
+									"pm.test(\"Response has success field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set(\"customerId\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"phoneNumber\": \"1234567890\",\n    \"email\": \"john.doe@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/onboard",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"onboard"
+							]
+						},
+						"description": "Onboards a new customer. Creates customer record and sends OTP to phone and email."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"OTP verified successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"1234567890\",\n    \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/verifyOtp",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"verifyOtp"
+							]
+						},
+						"description": "Verifies the OTP sent to customer. Check logs for OTP value."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Set Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Credentials set successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.customerAccounts) {",
+									"        var accounts = jsonData.data.customerAccounts;",
+									"        if (accounts && accounts.length > 0 && accounts[0].accountNumber) {",
+									"            pm.collectionVariables.set(\"accountNumber\", accounts[0].accountNumber);",
+									"        }",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"1234567890\",\n    \"password\": \"password123\",\n    \"mpin\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/setCredentials",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"setCredentials"
+							]
+						},
+						"description": "Sets password and MPIN for the customer. Account is created automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include(\"successful\");",
+									"});",
+									"",
+									"pm.test(\"Response contains customer data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"    pm.expect(jsonData.data).to.not.have.property('password');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"1234567890\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/login",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"login"
+							]
+						},
+						"description": "Authenticates customer using phone number and password. Returns customer data without password."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Get Customer by Phone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Customer data retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/{{phoneNumber}}",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"{{phoneNumber}}"
+							]
+						},
+						"description": "Retrieves customer details by phone number."
+					},
+					"response": []
+				},
+				{
+					"name": "6. Get Customer Account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Account data retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/account/{{accountNumber}}",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"account",
+								"{{accountNumber}}"
+							]
+						},
+						"description": "Retrieves customer account details by account number."
+					},
+					"response": []
+				},
+				{
+					"name": "7. Update Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Balance updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountNumber\": \"{{accountNumber}}\",\n    \"amount\": 1000.00\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/update-balance",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"update-balance"
+							]
+						},
+						"description": "Updates the balance of a customer account. Use positive amount to add, negative to deduct."
+					},
+					"response": []
+				},
+				{
+					"name": "8. Load Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Balance loaded successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Response contains account data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        pm.expect(jsonData.data).to.have.property('balance');",
+									"        pm.expect(jsonData.data).to.have.property('accountNumber');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"{{phoneNumber}}\",\n    \"amount\": 1000.00\n}"
+						},
+						"url": {
+							"raw": "{{customerServiceUrl}}/customer/load-balance",
+							"host": [
+								"{{customerServiceUrl}}"
+							],
+							"path": [
+								"customer",
+								"load-balance"
+							]
+						},
+						"description": "Loads/adds amount to customer account balance using phone number. Customer must be ACTIVE."
+					},
+					"response": []
+				}
+			],
+			"description": "APIs for customer management including onboarding, OTP verification, credentials, and account management."
+		},
+		{
+			"name": "Notification Service",
+			"item": [
+				{
+					"name": "Send OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"OTP sent successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"1234567890\",\n    \"email\": \"john.doe@example.com\",\n    \"otp\": \"123456\",\n    \"message\": \"Your OTP for e-Wallet registration is: 123456\"\n}"
+						},
+						"url": {
+							"raw": "{{notificationServiceUrl}}/notification/send-otp",
+							"host": [
+								"{{notificationServiceUrl}}"
+							],
+							"path": [
+								"notification",
+								"send-otp"
+							]
+						},
+						"description": "Sends OTP to customer via SMS and Email. OTP is also logged in console and log files."
+					},
+					"response": []
+				}
+			],
+			"description": "APIs for sending notifications including OTP via SMS and Email."
+		},
+		{
+			"name": "Transaction Service",
+			"item": [
+				{
+					"name": "Fund Transfer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Fund transfer successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set(\"transactionId\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerPhoneNumber\": \"{{phoneNumber}}\",\n    \"fromAccountNumber\": \"{{accountNumber}}\",\n    \"merchantId\": \"MERCHANT001\",\n    \"amount\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{transactionServiceUrl}}/transaction/fundTransfer",
+							"host": [
+								"{{transactionServiceUrl}}"
+							],
+							"path": [
+								"transaction",
+								"fundTransfer"
+							]
+						},
+						"description": "Transfers funds from customer account to merchant account. Transaction status: IN_PROGRESS -> PENDING -> AUTHORIZED"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transactions by Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Transactions retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{transactionServiceUrl}}/transaction/{{customerId}}",
+							"host": [
+								"{{transactionServiceUrl}}"
+							],
+							"path": [
+								"transaction",
+								"{{customerId}}"
+							]
+						},
+						"description": "Retrieves all transactions for a customer by customer ID."
+					},
+					"response": []
+				}
+			],
+			"description": "APIs for transaction management including fund transfers and transaction history."
+		},
+		{
+			"name": "Merchant Service",
+			"item": [
+				{
+					"name": "Get Merchant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Merchant data retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('merchantId');",
+									"    pm.expect(jsonData).to.have.property('merchantAccountNumber');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{merchantServiceUrl}}/merchant/MERCHANT001",
+							"host": [
+								"{{merchantServiceUrl}}"
+							],
+							"path": [
+								"merchant",
+								"MERCHANT001"
+							]
+						},
+						"description": "Retrieves merchant details by merchant ID. Available merchants: MERCHANT001, MERCHANT002, MERCHANT003"
+					},
+					"response": []
+				},
+				{
+					"name": "Credit Merchant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Credit successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"merchantAccountNumber\": \"MERCHANT_ACC_001\",\n    \"amount\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{merchantServiceUrl}}/merchant/credit",
+							"host": [
+								"{{merchantServiceUrl}}"
+							],
+							"path": [
+								"merchant",
+								"credit"
+							]
+						},
+						"description": "Credits amount to merchant account. This is a happy path implementation that always succeeds."
+					},
+					"response": []
+				}
+			],
+			"description": "APIs for merchant management including merchant details and credit operations."
+		}
+	],
+	"variable": [
+		{
+			"key": "customerServiceUrl",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "notificationServiceUrl",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "transactionServiceUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "merchantServiceUrl",
+			"value": "http://localhost:8084",
+			"type": "string"
+		},
+		{
+			"key": "phoneNumber",
+			"value": "1234567890",
+			"type": "string"
+		},
+		{
+			"key": "accountNumber",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transactionId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
